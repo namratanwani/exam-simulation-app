@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>AI-103: Developing AI Apps and Agents on Azure</h1>
+  <p class="muted">{{ total }} questions loaded across all modules.</p>
+
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+  <form method="post" action="{{ url_for('start') }}" id="quiz-form">
+    <fieldset>
+      <legend>Quiz type</legend>
+      <label><input type="radio" name="mode" value="section" checked> Section-wise</label>
+      <label><input type="radio" name="mode" value="module"> Module-wise</label>
+      <label><input type="radio" name="mode" value="full"> Full exam (all modules)</label>
+    </fieldset>
+
+    <div id="picker">
+      <label class="field">
+        Learning path
+        <select name="path" id="path"></select>
+      </label>
+      <label class="field">
+        Module
+        <select name="module" id="module"></select>
+      </label>
+      <label class="field" id="section-field">
+        Section
+        <select name="section" id="section"></select>
+      </label>
+    </div>
+
+    <label class="field">
+      How many questions?
+      <input type="number" name="count" id="count" min="1" value="10">
+    </label>
+    <p class="muted" id="available-hint"></p>
+
+    <button type="submit">Start quiz</button>
+  </form>
+
+  <script>
+    const structure = {{ structure | tojson }};
+    const modeInputs = document.querySelectorAll('input[name="mode"]');
+    const pathSel = document.getElementById('path');
+    const moduleSel = document.getElementById('module');
+    const sectionSel = document.getElementById('section');
+    const sectionField = document.getElementById('section-field');
+    const hint = document.getElementById('available-hint');
+    const countInput = document.getElementById('count');
+
+    function fillSelect(sel, values) {
+      sel.innerHTML = '';
+      values.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v; opt.textContent = v;
+        sel.appendChild(opt);
+      });
+    }
+
+    function countFor(mode) {
+      const path = pathSel.value, mod = moduleSel.value, sec = sectionSel.value;
+      // Structure only has names, so we can't count client-side without the
+      // bank; server clamps to what's actually available. Just show scope.
+      if (mode === 'full') return 'all modules';
+      if (mode === 'module') return `${path} / ${mod}`;
+      return `${path} / ${mod} / ${sec}`;
+    }
+
+    function updateVisibility() {
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+      document.getElementById('picker').style.display = mode === 'full' ? 'none' : '';
+      sectionField.style.display = mode === 'section' ? '' : 'none';
+      hint.textContent = 'Scope: ' + countFor(mode);
+    }
+
+    function onPathChange() {
+      const modules = Object.keys(structure[pathSel.value] || {});
+      fillSelect(moduleSel, modules);
+      onModuleChange();
+    }
+
+    function onModuleChange() {
+      const sections = (structure[pathSel.value] || {})[moduleSel.value] || [];
+      fillSelect(sectionSel, sections);
+      updateVisibility();
+    }
+
+    fillSelect(pathSel, Object.keys(structure));
+    pathSel.addEventListener('change', onPathChange);
+    moduleSel.addEventListener('change', onModuleChange);
+    sectionSel.addEventListener('change', updateVisibility);
+    modeInputs.forEach(r => r.addEventListener('change', updateVisibility));
+
+    onPathChange();
+  </script>
+{% endblock %}

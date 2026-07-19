@@ -1,36 +1,50 @@
-# Azure AI Apps and Agents Developer Associate — Exam Simulator (Data Collection Phase)
+# AI-103 Exam Simulator
 
-Target certification: **Microsoft Certified: Azure AI Apps and Agents Developer Associate**
-Exam: **AI-103 — Developing AI Apps and Agents on Azure**
+A local practice-question app for the Microsoft **AI-103: Developing AI Apps
+and Agents on Azure** exam (Azure AI Apps and Agents Developer Associate).
 
-This repo is currently in the **data collection** phase: gathering thorough study
-content and practice questions from the official Microsoft Learn training paths
-before any exam-simulator app is built.
+1,389+ questions across all 4 official learning paths, pulled from Microsoft
+Learn content in `modules/`.
 
-See [EXAM_SKILLS.md](EXAM_SKILLS.md) for the official skills-measured outline
-(used to keep content and questions grounded in what's actually tested) and
-[MODULES.md](MODULES.md) for the full module manifest with source URLs.
+## Setup
+
+```
+python3 -m venv .venv
+source .venv/bin/activate       # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+## Run it
+
+**Web UI** — open http://127.0.0.1:5050 in your browser:
+```
+python app.py
+```
+
+**CLI** — no dependencies needed, runs straight in the terminal:
+```
+python scripts/quiz.py
+```
+
+Either way, you pick:
+- **Section-wise**, **module-wise**, or **full-exam** quiz
+- How many questions (randomly sampled)
+
+Answer them one at a time, then get a score and a review of anything missed.
 
 ## Structure
 
 ```
 modules/
-  01-generative-ai-apps/     6 modules  — Develop generative AI apps on Microsoft Foundry
-  02-ai-agents/               9 modules  — Develop AI agents on Azure
-  03-language-solutions/      7 modules  — Develop natural language solutions in Azure
-  04-visual-data/             8 modules  — Extract insights from visual data on Azure
+  01-develop-generative-ai-apps-in-azure/
+  02-develop-ai-agents-on-azure/
+  03-develop-natural-language-solutions-in-azure/
+  04-extract-insights-from-visual-data-on-azure/
 ```
 
-Each module folder contains:
-- `content.md` — thorough notes organized by section/unit, sourced from the
-  module's Microsoft Learn units (concepts, definitions, key facts, code
-  snippets, service names/limits, and an "exam relevance" tag linking back to
-  EXAM_SKILLS.md).
-- `questions.md` — practice questions per section, grounded in `content.md`,
-  with answers and explanations.
+Numbered and named to match the official Microsoft Learn course order, so
+the number tells you what to study next. Each module folder has:
+- `content.md` — study notes for that module
+- `questions.md` — practice questions with answers and explanations
 
-## Status
-
-Data collection in progress. Once content + questions are complete for all
-30 modules, next steps (exam-simulator app design/build) will be planned
-separately.
+See [MODULES.md](MODULES.md) for the full module list with source links.

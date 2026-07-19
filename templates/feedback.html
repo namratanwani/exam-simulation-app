@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+  <p class="muted">{{ label }} &middot; Question {{ progress }}/{{ total }}</p>
+  <p class="scope">{{ q.path }} / {{ q.module }} / {{ q.section }}</p>
+
+  <div class="stem">{{ q.stem_html | safe }}</div>
+
+  <p class="result {{ status }}">
+    {% if status == 'correct' %}Correct!
+    {% elif status == 'partial' %}Partially correct ({{ (fraction * 100) | round | int }}%).
+    {% else %}Incorrect.
+    {% endif %}
+  </p>
+
+  {% if q.sequence %}
+    <p class="muted">
+      Your order: {{ given | join(', ') }} &middot;
+      Correct order: {{ q.sequence.correct_order | join(', ') }}
+    </p>
+    <ol class="options-list">
+      {% for item in q.sequence.steps %}
+        <li><strong>{{ item.num }}.</strong> {{ item.text_html | safe }}</li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <p class="muted">
+      Your answer: {{ given | join(', ') }} &middot;
+      Correct answer: {{ q.answer | join(', ') }}
+    </p>
+  {% endif %}
+
+  {% if q.explanation_html %}
+    <p class="explanation">{{ q.explanation_html | safe }}</p>
+  {% endif %}
+
+  <form method="get" action="{{ url_for('quiz' if not is_last else 'results') }}">
+    <button type="submit">{{ 'See results' if is_last else 'Next question' }}</button>
+  </form>
+{% endblock %}

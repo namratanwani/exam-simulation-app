@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+  <p class="muted">{{ label }} &middot; Question {{ progress }}/{{ total }}</p>
+  <p class="scope">{{ q.path }} / {{ q.module }} / {{ q.section }}</p>
+
+  <div class="stem">{{ q.stem_html | safe }}</div>
+
+  {% if q.sequence %}
+    <p class="muted">Put these steps in the correct order (use the arrows):</p>
+    <ol id="seq-list" class="seq-list">
+      {% for item in q.sequence.steps %}
+        <li data-num="{{ item.num }}">
+          <span class="seq-text">{{ item.text_html | safe }}</span>
+          <span class="seq-controls">
+            <button type="button" class="up" aria-label="Move up">&uarr;</button>
+            <button type="button" class="down" aria-label="Move down">&darr;</button>
+          </span>
+        </li>
+      {% endfor %}
+    </ol>
+    <form method="post" action="{{ url_for('quiz') }}" id="seq-form">
+      <button type="submit" id="submit-btn">Submit answer</button>
+    </form>
+    <script>
+      const list = document.getElementById('seq-list');
+      function swap(a, b) { list.insertBefore(a, b); }
+      list.addEventListener('click', function (e) {
+        const li = e.target.closest('li');
+        if (!li) return;
+        if (e.target.classList.contains('up') && li.previousElementSibling) {
+          swap(li, li.previousElementSibling);
+        } else if (e.target.classList.contains('down') && li.nextElementSibling) {
+          swap(li.nextElementSibling, li);
+        }
+      });
+      document.getElementById('seq-form').addEventListener('submit', function () {
+        const form = this;
+        list.querySelectorAll('li').forEach(function (li) {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'order';
+          input.value = li.dataset.num;
+          form.appendChild(input);
+        });
+      });
+    </script>
+  {% else %}
+    <form method="post" action="{{ url_for('quiz') }}">
+      <fieldset>
+        {% if multi %}
+          <p class="muted">Choose {{ q.answer | length }}:</p>
+        {% endif %}
+        {% for letter, text in q.options_html.items() %}
+          <label class="option">
+            <input type="{{ 'checkbox' if multi else 'radio' }}" name="letter" value="{{ letter }}" {{ 'required' if not multi else '' }}>
+            <span><strong>{{ letter }}.</strong> {{ text | safe }}</span>
+          </label>
+        {% endfor %}
+      </fieldset>
+      <button type="submit" id="submit-btn">Submit answer</button>
+    </form>
+
+    {% if multi %}
+    <script>
+      // Native `required` on checkboxes means "check every box," which is wrong
+      // for multi-select — enforce "at least one checked" ourselves instead.
+      document.getElementById('submit-btn').addEventListener('click', function (e) {
+        const checked = document.querySelectorAll('input[name="letter"]:checked');
+        if (checked.length === 0) {
+          e.preventDefault();
+          alert('Select at least one answer.');
+        }
+      });
+    </script>
+    {% endif %}
+  {% endif %}
+{% endblock %}

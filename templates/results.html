@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+  <p class="muted">{{ label }}</p>
+  <h1>Score: {{ score | round(1) }}/{{ total }} ({{ pct }}%)</h1>
+
+  {% if not missed %}
+    <p class="result correct">Perfect score!</p>
+  {% else %}
+    <h2>Review — {{ missed | length }} question{{ 's' if missed | length != 1 else '' }} not fully correct</h2>
+    {% for m in missed %}
+      <div class="review-item">
+        <p class="scope">{{ m.q.path }} / {{ m.q.module }} / {{ m.q.section }}</p>
+        <div class="stem">{{ m.q.stem_html | safe }}</div>
+
+        {% if m.q.sequence %}
+          <ol class="options-list">
+            {% for item in m.q.sequence.steps %}
+              <li><strong>{{ item.num }}.</strong> {{ item.text_html | safe }}</li>
+            {% endfor %}
+          </ol>
+          <p class="result {{ m.status }}">
+            Your order: {{ m.given | join(', ') }} &middot;
+            Correct order: {{ m.q.sequence.correct_order | join(', ') }}
+            ({{ (m.fraction * 100) | round | int }}%)
+          </p>
+        {% else %}
+          <ul class="options-list">
+            {% for letter, text in m.q.options_html.items() %}
+              <li><strong>{{ letter }}.</strong> {{ text | safe }}</li>
+            {% endfor %}
+          </ul>
+          <p class="result {{ m.status }}">
+            Your answer: {{ m.given | join(', ') }} &middot;
+            Correct: {{ m.q.answer | join(', ') }}
+            ({{ (m.fraction * 100) | round | int }}%)
+          </p>
+        {% endif %}
+
+        {% if m.q.explanation_html %}
+          <p class="explanation">{{ m.q.explanation_html | safe }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <a class="button" href="{{ url_for('index') }}">Take another quiz</a>
+{% endblock %}
