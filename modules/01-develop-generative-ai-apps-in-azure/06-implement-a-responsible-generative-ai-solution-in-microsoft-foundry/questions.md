@@ -26,10 +26,10 @@ D. Test, Mitigate, Document, Release
 **Answer:** A — Identify potential harms → Prioritize identified harms → Test and verify the prioritized harms → Document and share the verified harms.
 
 **Q4.** What testing strategy does the module recommend for verifying whether identified potential harms actually occur in a generative AI solution, and under what conditions?
-A. Load testing
+A. Load testing — load testing measures throughput/performance under volume, it doesn't verify whether specific harms actually occur
 B. Red team testing — testers deliberately probe the solution to try to produce harmful results
-C. Unit testing of the model's API client only
-D. A/B testing of UI layouts
+C. Unit testing of the model's API client only — unit testing checks connectivity/integration, not whether the model produces harmful outputs
+D. A/B testing of UI layouts — that evaluates interface design choices, not harm occurrence in model outputs
 **Answer:** B — Red team testing (borrowed from security testing practice) is the recommended approach; it can also surface previously unidentified harms.
 
 **Q5.** When prioritizing identified harms for a generative AI solution, what two factors should be assessed for each harm?
@@ -49,56 +49,56 @@ D. The SLA document
 **Q24.** Which of the following is listed among the common harm types to consider when identifying potential harms for a generative AI solution?
 
 A. Offensive, pejorative, or discriminatory content; factual inaccuracies; content that encourages/supports illegal or unethical behavior
-B. Slow response times, high latency, poor UI design
-C. High cloud costs, vendor lock-in, licensing complexity
-D. Overfitting, underfitting, model drift
+B. Slow response times, high latency, poor UI design — these are performance/UX engineering concerns, not the responsible-AI harm categories the module lists
+C. High cloud costs, vendor lock-in, licensing complexity — these are cost and vendor-strategy concerns, unrelated to the harm types described here
+D. Overfitting, underfitting, model drift — these are ML-training quality concerns, distinct from the harm categories described here
 **Answer:** A — These are the three common harm types the module lists under "Identify potential harms." The other options describe engineering/cost/ML-training concerns, not responsible-AI harm categories.
 
 **Q25.** Besides the Azure OpenAI Service transparency note and model-developer documentation (e.g., a system card), which Microsoft resource specifically provides a structured guide and accompanying template for evaluating potential harms of an AI solution?
 
-A. The Azure Well-Architected Framework
+A. The Azure Well-Architected Framework — that covers general cloud architecture best practices, not a harm-assessment guide/template
 B. The Microsoft Responsible AI Impact Assessment Guide, along with its accompanying Responsible AI Impact Assessment template
-C. The Azure Pricing Calculator
-D. The NIST Cybersecurity Framework
+C. The Azure Pricing Calculator — that estimates cost, it provides no guide or template for evaluating potential harms
+D. The NIST Cybersecurity Framework — that addresses general security risk management, not the specific Microsoft resource named here
 **Answer:** B — The module lists the Responsible AI Impact Assessment Guide and its accompanying template as resources to consult when identifying potential harms, alongside the transparency note and model-developer documentation.
 
 **Q26.** In the module's smart-kitchen-copilot example, how does the team weigh "the assistant provides a recipe for a lethal poison" against "the assistant gives inaccurate cooking times" when prioritizing harms?
 
-A. Both harms are always weighted identically since they are both "harms"
+A. Both harms are always weighted identically since they are both "harms" — the module's example explicitly weighs likelihood against impact differently for each harm, not identically
 B. The poison-recipe harm is treated as higher-impact but lower-frequency, while inaccurate cooking times is higher-frequency but lower per-instance impact — the team weighs both dimensions to decide overall priority
-C. Only frequency matters; impact is never considered in prioritization
-D. The lethal-poison-recipe harm is ignored entirely since it's an edge case
+C. Only frequency matters; impact is never considered in prioritization — the module weighs both likelihood and impact together, not frequency alone
+D. The lethal-poison-recipe harm is ignored entirely since it's an edge case — rare-but-severe harms like this are explicitly weighed for their high impact, not dismissed
 **Answer:** B — This is the module's own illustrative example of the likelihood × impact prioritization trade-off: rare-but-severe harms must be weighed against common-but-minor ones, a deliberately subjective judgment the team must make.
 
 ## Measure potential harms
 
 **Q7.** What is the purpose of the initial "baseline" created during the Measure stage?
-A. To set the model's default temperature parameter
+A. To set the model's default temperature parameter — temperature is an inference-time randomness setting, unrelated to quantifying harm levels
 B. To quantify the harms produced by the solution in given usage scenarios, so improvements can be tracked against it as mitigations are applied
-C. To determine the Azure subscription's spending limit
-D. To calculate the number of tokens consumed per request
+C. To determine the Azure subscription's spending limit — spending limits are a billing concern, not something the harm baseline addresses
+D. To calculate the number of tokens consumed per request — token consumption relates to cost/latency, not to quantifying current harm levels
 **Answer:** B — The baseline quantifies current harm levels; subsequent iterative changes are measured for improvement against this baseline.
 
 **Q8.** What are the three generalized steps for measuring potential harms in a generative AI solution?
-A. Deploy, monitor, alert
+A. Deploy, monitor, alert — that's a general operations cycle, not the module's specific prepare-submit-categorize measurement steps
 B. Prepare diverse input prompts likely to elicit each harm, submit them and retrieve output, apply pre-defined criteria to categorize the output's harm level
-C. Fine-tune, evaluate, redeploy
-D. Identify, prioritize, document
+C. Fine-tune, evaluate, redeploy — that's a fine-tuning workflow, unrelated to preparing prompts and categorizing harmful output
+D. Identify, prioritize, document — those are Map-stage steps, not the three generalized Measure-stage steps described here
 **Answer:** B — Prepare prompts targeting each documented harm → submit and retrieve output → apply strict, pre-defined criteria to categorize harm level.
 
 **Q9.** What is the recommended sequencing of manual vs. automated testing when measuring harms, and why should manual testing continue even after automation is implemented?
-A. Automate first at full scale, then manually test only if automation fails; manual testing is otherwise unnecessary
+A. Automate first at full scale, then manually test only if automation fails; manual testing is otherwise unnecessary — the module recommends manual testing first to validate the approach, not treating it as a fallback only
 B. Start with manual testing on a small set to validate consistent results and well-defined criteria, then automate at scale; continue periodic manual testing to validate new scenarios and confirm the automated solution still performs as expected
-C. Only manual testing is recommended; automation is discouraged for responsible AI evaluation
-D. Automated and manual testing are mutually exclusive approaches that should never be combined
+C. Only manual testing is recommended; automation is discouraged for responsible AI evaluation — the module explicitly recommends automating at scale after manual validation, not discouraging it
+D. Automated and manual testing are mutually exclusive approaches that should never be combined — the module explicitly combines both, with manual testing continuing periodically even after automation
 **Answer:** B — Manual testing first validates the approach; automation scales it; periodic manual testing continues afterward as a check on the automated system.
 
 **Q27.** When applying pre-defined criteria to categorize an output's harm level during the Measure stage, what quality must those criteria have, per the module?
 
-A. They can vary from prompt to prompt for flexibility
+A. They can vary from prompt to prompt for flexibility — the module requires strict, consistent criteria across evaluations, not criteria that vary per prompt
 B. They must be strict and consistent — whether a simple harmful/not-harmful judgment or a defined range of harm levels
-C. They should be determined solely by the model being tested, without human input
-D. They are optional if automated testing is used
+C. They should be determined solely by the model being tested, without human input — the module doesn't describe the model under test as defining its own evaluation criteria
+D. They are optional if automated testing is used — strict, consistent criteria are needed regardless of whether measurement is automated or manual
 **Answer:** B — The module states the pre-defined criteria used to categorize output "must be strict/consistent," regardless of whether the scale is binary (harmful/not-harmful) or a defined range of harm levels.
 
 ## Mitigate potential harms
@@ -125,17 +125,17 @@ D. Violence, self-harm, sexual, fraud, copyright infringement
 **Answer:** A — The five categories are hate and fairness, sexual, violence, self-harm, and task-adherence.
 
 **Q13.** A user is attempting to systematically subvert an AI application's system prompt to bypass its intended behavior (a jailbreak attempt). Which Microsoft Foundry guardrails capability is specifically designed to detect this kind of abuse?
-A. Content filters
+A. Content filters — content filters classify the severity of generated output, they don't specifically detect systematic system-prompt subversion
 B. Prompt shields — use abuse-detection algorithms to determine if the solution is being systematically abused
-C. Fine-tuning with DPO
-D. Red team testing
+C. Fine-tuning with DPO — DPO is a fine-tuning alignment technique, unrelated to detecting live jailbreak attempts at runtime
+D. Red team testing — that's a proactive development-time exercise, not a runtime capability that detects abuse in production
 **Answer:** B — Prompt shields specifically target abuse/subversion attempts (e.g., prompt injection or jailbreak attempts), distinct from content filters which classify generated content severity.
 
 **Q14.** At the "model layer" of the mitigation approach, what are two valid mitigation techniques?
 A. Selecting an appropriately-scoped model for the task, and fine-tuning a foundational model on your own training data
-B. Adding a rollback plan and an incident response plan
-C. Constraining UI inputs and adding output validation
-D. Using RAG to retrieve grounding data
+B. Adding a rollback plan and an incident response plan — these belong to the Manage stage, not the model layer of the mitigation approach
+C. Constraining UI inputs and adding output validation — these are user experience layer techniques, not model layer techniques
+D. Using RAG to retrieve grounding data — RAG-based grounding belongs to the system message and grounding layer, not the model layer
 **Answer:** A — Model layer mitigations include choosing a model appropriate to the task's risk/complexity and fine-tuning to scope responses to your scenario. (RAG and grounding belong to the "system message and grounding" layer; rollback/incident plans belong to the "manage" stage; UI constraints belong to the "user experience" layer.)
 
 **Q15.** Which mitigation layer is responsible for techniques like using RAG to retrieve contextual data from trusted sources and including it in prompts?
@@ -154,10 +154,10 @@ D. User experience layer
 
 **Q28.** Per the module, what should an application's documentation be transparent about at the user experience mitigation layer?
 
-A. Only the Azure subscription cost associated with the deployment
+A. Only the Azure subscription cost associated with the deployment — subscription cost isn't among the transparency elements the module lists for this layer
 B. The system's capabilities, limitations, base models used, and potential harms not fully addressed by other mitigations
-C. The internal source code of the underlying model
-D. The exact training dataset used to pretrain the base model
+C. The internal source code of the underlying model — exposing internal source code isn't part of the transparency guidance the module describes
+D. The exact training dataset used to pretrain the base model — the exact pretraining dataset isn't something the module asks documentation to disclose
 **Answer:** B — The module states user experience layer documentation "should be transparent about capabilities, limitations, base models, and potential harms not fully addressed by mitigations."
 
 ## Manage a responsible generative AI solution
@@ -191,10 +191,10 @@ D. Telemetry should only be collected from internal employees, never external us
 **Answer:** B — The module explicitly notes telemetry collection must comply with privacy laws and organizational privacy commitments.
 
 **Q21.** Users should be able to report generated content using which categories, according to the module's guidance on release/operation feedback mechanisms?
-A. Slow, fast, average
+A. Slow, fast, average — these describe performance perception, not the harm-reporting categories the module actually lists
 B. Inaccurate, incomplete, harmful, offensive, or otherwise problematic
-C. Expensive, cheap, free
-D. Approved, rejected, pending
+C. Expensive, cheap, free — these describe cost/pricing, unrelated to how users report problematic generated content
+D. Approved, rejected, pending — these describe an approval workflow status, not harm-reporting categories
 **Answer:** B — The module specifically lists these categories for user-reported content issues, enabling ongoing harm identification post-release.
 
 **Q29.** Beyond having a rollback plan and an incident response plan, which TWO operational capabilities does the module list as necessary for responsibly releasing and operating a generative AI solution? (Choose 2.)
@@ -208,33 +208,33 @@ D. Capability to disable all content filters temporarily to reduce latency
 ## Scenario / synthesis
 
 **Q22.** A developer wants to reduce the risk of a generative AI travel assistant giving unsafe or off-brand answers. They configure Microsoft Foundry content filters to block "high" and "medium" severity content in the "violence" and "self-harm" categories, and separately enable prompt shields. Which mitigation layer(s) are these two actions part of?
-A. Model layer
+A. Model layer — the model layer concerns model selection/fine-tuning, not runtime guardrails like content filters or prompt shields
 B. Safety system layer (both content filters and prompt shields are Foundry guardrails capabilities at this layer)
-C. User experience layer
-D. Manage stage
+C. User experience layer — that layer concerns UI constraints and transparent documentation, not content filter/prompt shield capabilities
+D. Manage stage — Manage is a lifecycle stage for release/operations, not a mitigation layer where these guardrails sit
 **Answer:** B — Content filters and prompt shields are both part of Microsoft Foundry's guardrails, which operate at the safety system layer.
 
 **Q23.** A team has deployed a generative AI feature and now wants to detect if the model's live performance is drifting toward more harmful outputs than what was measured pre-launch. Which combination of practices from this module supports that ongoing detection?
-A. One-time red team testing during initial development only, with no further action needed
+A. One-time red team testing during initial development only, with no further action needed — a single one-time test can't detect drift that emerges after launch as usage patterns change
 B. Establishing a harm-measurement baseline pre-launch, then continuing periodic (manual and automated) measurement plus telemetry/user feedback reporting post-launch to detect drift
-C. Relying solely on the model's built-in temperature parameter to prevent drift
-D. Skipping the Measure stage entirely since Mitigate stage guardrails are sufficient on their own
+C. Relying solely on the model's built-in temperature parameter to prevent drift — temperature only adjusts output randomness, it has no mechanism for detecting drift in harmful-output rates
+D. Skipping the Measure stage entirely since Mitigate stage guardrails are sufficient on their own — the module treats Measure's baseline and ongoing measurement as necessary alongside Mitigate's guardrails, not replaceable
 **Answer:** B — The Measure stage establishes a baseline for comparison, and the Manage stage's telemetry and user-feedback mechanisms provide ongoing signals post-release — together enabling drift detection over time.
 
 **Q30.** A team is choosing a model for a narrow, low-risk classification feature (categorizing support tickets by department) versus a general-purpose creative-writing assistant. Per the model-layer mitigation guidance, which approach best reduces harm risk for the classification feature?
 
-A. Use the largest general-purpose model available for both features, since bigger is always safer
+A. Use the largest general-purpose model available for both features, since bigger is always safer — the module states smaller/simpler models scoped to a narrow task may carry lower risk than a large general-purpose model, the opposite of this claim
 B. Select a simpler/smaller model scoped to the narrow classification task, since it may carry lower risk of harmful generation than a large general-purpose model, and reserve broader risk controls for the creative-writing assistant
-C. Apply prompt shields only, since model choice doesn't affect harm risk
-D. Fine-tune the general-purpose model to write poetry, since fine-tuning always eliminates harm risk
+C. Apply prompt shields only, since model choice doesn't affect harm risk — prompt shields operate at the safety system layer; the module treats model selection as a separate, model-layer risk lever
+D. Fine-tune the general-purpose model to write poetry, since fine-tuning always eliminates harm risk — fine-tuning can scope behavior, but the module never claims it eliminates harm risk entirely
 **Answer:** B — The module's model-layer guidance states a simpler/smaller model for narrow tasks may carry lower risk of harmful generation than a large general-purpose model like GPT-4, making model selection itself a risk-reduction lever distinct from safety-system controls like prompt shields.
 
 **Q31.** During red-team testing, testers discover a previously undocumented jailbreak technique that bypasses the system prompt. Which sequence of module-defined actions should follow, spanning multiple stages?
 
-A. Ignore it since it wasn't part of the original harm list
+A. Ignore it since it wasn't part of the original harm list — the Map stage explicitly calls for documenting and sharing newly discovered harms, including ones not on the original list
 B. Document and share the newly found harm (Map stage), measure its occurrence against defined criteria (Measure stage), enable/tune prompt shields and content filters to mitigate it (Mitigate stage, safety system layer), and update the prioritized harm list plus operational plans (Manage stage)
-C. Immediately and permanently shut down the entire application with no further analysis
-D. Increase the temperature parameter, since higher randomness prevents jailbreaks
+C. Immediately and permanently shut down the entire application with no further analysis — the module describes a structured multi-stage response across Map/Measure/Mitigate/Manage, not an immediate permanent shutdown
+D. Increase the temperature parameter, since higher randomness prevents jailbreaks — higher temperature increases output randomness, it has no established relationship to preventing prompt-subversion attempts
 **Answer:** B — This traces the newly discovered harm across all four stages: Map explicitly notes red teaming "may reveal new, previously unidentified harms" that must then be documented/shared; Measure quantifies it; Mitigate applies safety-system-layer controls (prompt shields, content filters); Manage keeps the harm list and readiness plans current.
 
 **Q32.** A company is preparing to launch a new generative AI feature. They plan a restricted-audience rollout first, have defined how quickly they'll respond to incidents, and have a way to revert to the previous version if something goes wrong. Which Manage-stage elements does this describe, respectively?
@@ -247,16 +247,16 @@ D. Map stage prioritization, Measure stage baseline, Mitigate stage grounding
 
 **Q33.** A generative AI assistant passed manual harm testing on a small prompt set during development. Six months post-launch, the team wants ongoing assurance that harmful-output rates haven't crept up as usage patterns evolved. Which combination of this module's practices addresses this?
 
-A. Nothing further is needed once manual testing passes once
+A. Nothing further is needed once manual testing passes once — a single pre-launch pass can't detect drift that emerges from evolving usage patterns months later
 B. Continue automated measurement at scale against the original baseline, periodically supplement with manual testing on new scenarios, and use post-launch telemetry/user feedback reporting to catch issues the original test set didn't anticipate
-C. Rely exclusively on prompt shields, since they replace the need for ongoing measurement
-D. Re-run only the original Map stage harm list without ever re-measuring
+C. Rely exclusively on prompt shields, since they replace the need for ongoing measurement — prompt shields are a Mitigate-stage safety-system control, they don't substitute for the Measure stage's ongoing harm-rate tracking
+D. Re-run only the original Map stage harm list without ever re-measuring — re-checking the harm list without re-measuring wouldn't detect whether actual harmful-output rates have changed
 **Answer:** B — This combines the Measure stage's guidance (automate at scale against the baseline, but keep performing periodic manual testing to validate new scenarios) with the Manage stage's telemetry and user-feedback reporting mechanisms for post-launch signal.
 
 **Q34.** An application's content filters are configured to flag "medium" and "high" severity content in the "self-harm" category, but a reviewer notes the filters alone won't stop a user who has learned to phrase harmful requests in a way that evades the system prompt's original intent. Which additional Foundry guardrails capability should be layered on, and at which mitigation layer does it operate?
 
-A. Red team testing; Map stage
+A. Red team testing; Map stage — red team testing is a development-time exercise under the Map stage, not a runtime guardrails capability layered alongside content filters
 B. Prompt shields — abuse-detection algorithms that detect systematic attempts to subvert the system prompt; operates at the safety system layer alongside content filters
-C. Telemetry; Manage stage
-D. RAG; system message and grounding layer
+C. Telemetry; Manage stage — telemetry is a Manage-stage post-launch signal, not a safety-system-layer capability that detects prompt-subversion attempts
+D. RAG; system message and grounding layer — RAG-based grounding addresses factual grounding, not jailbreak/abuse detection
 **Answer:** B — Prompt shields are the Foundry guardrails capability specifically designed to detect systematic abuse/subversion of the system prompt (jailbreak-style attacks), and — like content filters — they operate at the safety system layer, the second of the four mitigation layers.

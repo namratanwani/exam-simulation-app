@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Wrong Answers</h1>
+
+  {% if not attempts %}
+    <p class="muted">No quizzes taken yet — they'll show up here after you finish one.</p>
+  {% else %}
+    <div class="wrong-header">
+      <p class="muted">{{ attempts | length }} quiz{{ 'zes' if attempts | length != 1 else '' }} taken.</p>
+      <form method="post" action="{{ url_for('wrong_answers_clear') }}"
+            onsubmit="return confirm('Clear all quiz history?');">
+        <button type="submit">Clear history</button>
+      </form>
+    </div>
+
+    {% for a in attempts %}
+      <details class="attempt">
+        <summary>
+          <span class="attempt-info">
+            <span class="attempt-date">{{ a.taken_at[:10] }}</span>
+            <span class="attempt-label">{{ a.label }}</span>
+          </span>
+          <span class="attempt-score">{{ a.score | round(1) }}/{{ a.total }} ({{ a.pct }}%)</span>
+        </summary>
+
+        {% if not a.questions %}
+          <p class="result correct">Perfect score — nothing missed.</p>
+        {% else %}
+          {% for m in a.questions %}
+            <div class="review-item">
+              <p class="scope">{{ m.path }} / {{ m.module }} / {{ m.section }}</p>
+              <div class="stem">{{ m.stem_html | safe }}</div>
+
+              {% if m.sequence %}
+                <ol class="options-list">
+                  {% for item in m.sequence.steps %}
+                    <li><strong>{{ item.num }}.</strong> {{ item.text_html | safe }}</li>
+                  {% endfor %}
+                </ol>
+                <p class="result {{ m.status }}">
+                  Your order: {{ m.given_answer | join(', ') }} &middot;
+                  Correct order: {{ m.sequence.correct_order | join(', ') }}
+                  ({{ (m.fraction * 100) | round | int }}%)
+                </p>
+              {% else %}
+                <ul class="options-list">
+                  {% for letter, text in m.options_html.items() %}
+                    <li><strong>{{ letter }}.</strong> {{ text | safe }}</li>
+                  {% endfor %}
+                </ul>
+                <p class="result {{ m.status }}">
+                  Your answer: {{ m.given_answer | join(', ') }} &middot;
+                  Correct: {{ m.correct_answer | join(', ') }}
+                  ({{ (m.fraction * 100) | round | int }}%)
+                </p>
+              {% endif %}
+
+              {% if m.explanation_html %}
+                <p class="explanation">{{ m.explanation_html | safe }}</p>
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% endif %}
+      </details>
+    {% endfor %}
+  {% endif %}
+{% endblock %}

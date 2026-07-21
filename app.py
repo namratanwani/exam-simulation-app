@@ -15,6 +15,7 @@ from pathlib import Path
 from flask import Flask, redirect, render_template, request, session, url_for
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
+import history  # noqa: E402
 from question_bank import (  # noqa: E402
     build_structure, load_bank, parse_sequence, random_letter_map, remap_options, score_answer,
 )
@@ -28,6 +29,7 @@ app.jinja_env.policies["json.dumps_kwargs"] = {"sort_keys": False}
 
 BANK = load_bank()
 STRUCTURE = build_structure(BANK)
+history.init_db()
 
 FENCE_RE = re.compile(r"```(\w*)\n(.*?)```", re.DOTALL)
 INLINE_CODE_RE = re.compile(r"`([^`\n]+)`")
@@ -79,6 +81,7 @@ def index():
     session.pop("question_ids", None)
     session.pop("answers", None)
     session.pop("label", None)
+    session.pop("recorded", None)
     return render_template("index.html", structure=STRUCTURE, total=len(BANK))
 
 
@@ -118,6 +121,7 @@ def start():
     session["answers"] = []
     session["label"] = label
     session["shuffle_seed"] = random.randint(0, 2**31 - 1)
+    session.pop("recorded", None)
     return redirect(url_for("quiz"))
 
 
@@ -184,11 +188,26 @@ def results():
         if a["status"] != "correct"
     ]
 
+    if not session.get("recorded"):
+        history.record_attempt(session.get("label", ""), score, total, pct, missed)
+        session["recorded"] = True
+
     return render_template(
         "results.html",
         score=score, total=total, pct=pct,
         missed=missed, label=session.get("label", ""),
     )
+
+
+@app.route("/wrong-answers")
+def wrong_answers():
+    return render_template("wrong_answers.html", attempts=history.list_attempts())
+
+
+@app.route("/wrong-answers/clear", methods=["POST"])
+def wrong_answers_clear():
+    history.clear_all()
+    return redirect(url_for("wrong_answers"))
 
 
 if __name__ == "__main__":

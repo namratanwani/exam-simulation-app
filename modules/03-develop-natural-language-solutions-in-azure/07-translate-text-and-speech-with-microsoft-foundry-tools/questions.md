@@ -3,17 +3,17 @@
 ## Translation in Microsoft Foundry
 
 **Q1.** Which two Foundry Tools does Microsoft Foundry provide for comprehensive multi-language translation, and what does each primarily handle?
-A. Azure AI Search (text) and Azure Vision (speech)
+A. Azure AI Search (text) and Azure Vision (speech) — neither is the Foundry Tool this module actually uses for translation
 B. Azure Translator in Foundry Tools (text translation) and Azure Speech in Foundry Tools (speech-to-text and speech-to-speech translation)
-C. Azure Content Understanding (text) and Azure Document Intelligence (speech)
-D. Azure OpenAI (text) and Azure Bot Service (speech)
+C. Azure Content Understanding (text) and Azure Document Intelligence (speech) — both extract structured data rather than translate language
+D. Azure OpenAI (text) and Azure Bot Service (speech) — neither is the dedicated translation-focused Foundry Tool this module describes
 **Answer:** B — Azure Translator handles comprehensive text translation with custom model support; Azure Speech handles speech-to-text and simultaneous multi-language speech-to-speech translation.
 
 **Q2.** Why does the module state that comprehensive multi-language translation solutions generally require specialized models, even though many LLMs can translate phrases or documents?
-A. LLMs cannot process any non-English text at all
+A. LLMs cannot process any non-English text at all — an overstatement, since many LLMs do support multiple languages to some extent
 B. LLMs generally lack the depth needed for comprehensive, wide-language-range translation compared to purpose-built translation services
-C. LLMs are more expensive than every translation-specific service in all cases
-D. Specialized models are required by law for any Azure deployment
+C. LLMs are more expensive than every translation-specific service in all cases — a cost claim the module never actually makes
+D. Specialized models are required by law for any Azure deployment — there's no such legal requirement described anywhere in the module
 **Answer:** B — The module notes that while LLMs can translate, comprehensive solutions generally require the specialized translation models that Foundry Tools like Azure Translator provide.
 
 ## Translate text (Azure Translator)
@@ -89,17 +89,17 @@ D. French (`fr`) and Japanese (`ja`)
 **Answer:** A — "Detected sources in the example: Spanish (es) for 'Hola', Japanese (ja) for 'こんにちは' — each translated to both fr and en."
 
 **Q13.** In the `translate` method, what type of object represents each piece of source text to be translated, and what parameter specifies the target language(s)?
-A. `TextBlock` objects; `target_lang` parameter
+A. `TextBlock` objects; `target_lang` parameter (not the names used in this module's actual code)
 B. `InputTextItem` objects; `to_language` parameter (a list of language codes)
-C. `TranslationRequest` objects; `destination` parameter
-D. Raw strings only; no target-language parameter needed
+C. `TranslationRequest` objects; `destination` parameter (not the parameter names shown in the module's example)
+D. Raw strings only; no target-language parameter needed (the example always passes `to_language` explicitly)
 **Answer:** B — Source text is passed as a list of `InputTextItem` objects, and `to_language` takes a list of target language codes, returning one translation per valid code.
 
 **Q14.** What is the key conceptual difference between the `translate` method and the `transliterate` method in Azure Translator?
-A. They are functionally identical; `transliterate` is just a deprecated alias for `translate`
+A. They are functionally identical; `transliterate` is just a deprecated alias for `translate` with no distinct behavior of its own
 B. `translate` converts text to a different language; `transliterate` renders text in a different script/writing system while keeping the same language
-C. `translate` only works for speech, while `transliterate` only works for text
-D. `transliterate` requires an LLM, while `translate` never uses one
+C. `translate` only works for speech, while `transliterate` only works for text — reversed from how the module actually describes each method's scope
+D. `transliterate` requires an LLM, while `translate` never uses one — neither method in this module involves calling an LLM at all
 **Answer:** B — Transliteration changes the writing script (e.g., Japanese Hiragana to Latin script) without changing the language, distinct from translation which changes the language itself.
 
 **Q15.** In the `transliterate` method example converting Japanese Hiragana text to Latin script, which parameters specify the source and target scripts?
@@ -149,17 +149,17 @@ D. Synchronous synthesis and asynchronous synthesis
 **Answer:** A — Manual synthesis (recognize text, then synthesize each language's text separately) and event-based synthesis (capture audio via a `synthesizing` event handler) are the two approaches covered.
 
 **Q21.** Which speech-synthesis approach can handle MULTIPLE target languages, and which is restricted to a single (1:1) target language only?
-A. Both approaches support multiple languages equally
+A. Both approaches support multiple languages equally — the module doesn't describe any such symmetry between manual and event-based synthesis
 B. Manual synthesis supports multiple languages (via a separate `SpeechSynthesizer` per language); event-based synthesis supports only one target language
-C. Event-based synthesis supports multiple languages; manual synthesis supports only one
-D. Neither approach supports more than one language
+C. Event-based synthesis supports multiple languages; manual synthesis supports only one — this reverses the module's actual 1:1 vs. multi-language distinction
+D. Neither approach supports more than one language — but manual synthesis explicitly loops over multiple target-language translations in the example
 **Answer:** B — Manual synthesis iterates all target-language translations and synthesizes each separately, while event-based synthesis is explicitly stated as usable only for 1:1 translation.
 
 **Q22.** In manual synthesis, what is used to ensure correct pronunciation for each target language's synthesized speech output?
-A. A single default voice applied to all languages
+A. A single default voice applied to all languages, regardless of which target language is being synthesized
 B. Language-specific voice names (e.g., `fr-FR-HenriNeural`, `ja-JP-NanamiNeural`) mapped per target language
-C. Automatic voice detection with no configuration needed
-D. The same voice used for speech recognition input
+C. Automatic voice detection with no configuration needed — the example always sets voice names explicitly, never automatically
+D. The same voice used for speech recognition input, reused unchanged for every target-language synthesis output
 **Answer:** B — The module's example maps target-language codes to specific neural voice names to optimize pronunciation per language.
 
 **Q23.** In event-based synthesis, which event on the `TranslationRecognizer` object must you handle to capture the synthesized translated audio, and what property provides the audio byte stream?
@@ -180,23 +180,23 @@ D. In a separate `SpeechSynthesizer` object, just like manual synthesis
 
 **Q25.** A developer needs to translate a live English phone call into both French and Spanish text simultaneously for two different support agents to read, with no audio output required. Which combination of Azure Speech objects should they use, and do they need `SpeechSynthesizer` at all?
 A. `SpeechTranslationConfig` (with two `add_target_language` calls) + `AudioConfig` + `TranslationRecognizer`; no `SpeechSynthesizer` needed since only text output is required
-B. Only a `SpeechSynthesizer`, since translation always requires synthesis
-C. `TextTranslationClient` with `InputTextItem`, since this is a text-only translation problem
-D. Event-based synthesis with two `TranslationConfig.voice_name` values set simultaneously
+B. Only a `SpeechSynthesizer`, since translation always requires synthesis — but `SpeechSynthesizer` alone can't recognize or translate speech, and no audio output is needed here
+C. `TextTranslationClient` with `InputTextItem`, since this is a text-only translation problem — but the source here is live spoken audio, not text, so a speech-capable client is required
+D. Event-based synthesis with two `TranslationConfig.voice_name` values set simultaneously — but event-based synthesis only supports one target language and one voice_name value
 **Answer:** A — Since only translated text output is needed (not audio), `TranslationRecognizer` with multiple target languages configured is sufficient; synthesis (manual or event-based) is only needed when spoken audio output is required. Option D is also invalid because event-based synthesis supports only one target language, and voice_name isn't a multi-value property.
 
 **Q26.** A developer wants real-time spoken audio output translated from English into French only, choosing between manual and event-based synthesis. Which approach is more appropriate given the single-language, audio-focused requirement, and why?
-A. Manual synthesis, because it's the only approach that produces any audio at all
+A. Manual synthesis, because it's the only approach that produces any audio at all — untrue, since event-based synthesis also produces an audio stream via its synthesizing event
 B. Event-based synthesis, because it's designed for 1:1 (single target language) translation and directly captures the synthesized audio stream via the `synthesizing` event
-C. Neither approach works for single-language speech-to-speech translation
-D. Manual synthesis is required because event-based synthesis only works with text output
+C. Neither approach works for single-language speech-to-speech translation — both approaches actually support this exact single-target-language case
+D. Manual synthesis is required because event-based synthesis only works with text output — but event-based synthesis specifically produces audio, not text
 **Answer:** B — Event-based synthesis is specifically suited to 1:1 translation scenarios and directly provides the audio stream through its event handler, making it a more targeted fit than the more general manual synthesis approach (which is required only when multiple target languages need separate synthesis).
 
 **Q27.** You need to both translate a Japanese customer review into English text AND provide the original-language review rendered in Latin script for a team that reads Romanized Japanese but doesn't read Japanese script. Which two Azure Translator methods would you call?
-A. `translate()` only, since it also transliterates as a side effect
+A. `translate()` only, since it also transliterates as a side effect — but `translate()` changes language, it never renders text in a different script
 B. `translate()` to get the English text, and `transliterate()` (`from_script="Jpan"`, `to_script="Latn"`) to get the Romanized original-language text
-C. `transliterate()` only, since it also changes language
-D. `get_supported_languages()` to auto-produce a transliteration
+C. `transliterate()` only, since it also changes language — but `transliterate()` explicitly keeps the same language and only changes the writing script
+D. `get_supported_languages()` to auto-produce a transliteration — that method only lists supported language codes, it performs no translation or transliteration
 **Answer:** B — `translate()` changes language (Japanese → English); `transliterate()` changes script while keeping the same language (Japanese in Hiragana/Kanji → Japanese in Latin script) — these are the two distinct, non-overlapping operations this module describes.
 
 **Q28.** Your app must connect to Azure Translator without embedding an endpoint URL, using only the resource's region. Which constructor call is correct, per this module's code sample?

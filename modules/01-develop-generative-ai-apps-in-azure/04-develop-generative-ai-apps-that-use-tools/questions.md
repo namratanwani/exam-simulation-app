@@ -4,19 +4,19 @@
 
 **Q1.** A developer confuses the `web_search` tool used in Responses API prompts with "Foundry Tools" like Azure Language and Azure Speech. Which statement correctly clarifies the distinction per Microsoft Learn?
 
-A. They are exactly the same thing, just described differently in different modules
+A. They are exactly the same thing, just described differently in different modules — but the module explicitly separates the two concepts by name and purpose
 B. Tools used in generative AI model prompts (code_interpreter, web_search, file_search, function) are distinct from Foundry Tools, which are Azure AI APIs used in applications and agents
-C. Foundry Tools can only be used inside the code_interpreter sandbox
-D. web_search is a Foundry Tool but code_interpreter is not
+C. Foundry Tools can only be used inside the code_interpreter sandbox — this confuses two unrelated concepts and isn't stated anywhere in the module
+D. web_search is a Foundry Tool but code_interpreter is not — both are prompt-level tools, and neither one is a Foundry Tool at all
 
 **Answer:** B — The module explicitly states: "The use of tools in generative AI model prompts shouldn't be confused with Foundry Tools; which are Azure AI APIs that you can use in your applications and agents." This is a classic close-naming exam trap.
 
 **Q2.** By default, who/what decides WHEN and WHICH tool to use during a Responses API call?
 
-A. The developer must explicitly select the tool in every request
+A. The developer must explicitly select the tool in every request — the module describes the opposite default behavior
 B. The model itself chooses when to use a tool (and which one), based on the prompt — though this can be guided via Instructions and tool selection rules
-C. Azure Content Safety automatically selects tools
-D. Tools are always invoked in a fixed sequential order
+C. Azure Content Safety automatically selects tools — Content Safety handles moderation, not tool selection, and isn't mentioned in this context
+D. Tools are always invoked in a fixed sequential order — the module describes model-driven selection, not any fixed ordering
 
 **Answer:** B — "By default, the model chooses when to use a tool (and which one), based on the prompt. You can configure tool selection rules and use the Instructions (system prompt) parameter to guide this choice."
 
@@ -40,10 +40,10 @@ D. Ground responses in facts to reduce incorrect information
 
 **Q22.** How does this module describe the relationship between specifying tools directly in client-application prompts and building a full agentic AI solution?
 
-A. They are unrelated approaches with no connection
+A. They are unrelated approaches with no connection — the module frames one as an explicit stepping stone toward the other
 B. Specifying tools in client-application prompts is described as a stepping stone toward agentic AI, where model + instructions + tools are encapsulated/persisted in a named agent
-C. Client-application tool use is deprecated in favor of agents
-D. Agents cannot use the same four tools described in this module
+C. Client-application tool use is deprecated in favor of agents — the module presents it as a valid earlier stage, not a deprecated approach
+D. Agents cannot use the same four tools described in this module — nothing in the module states agents lose access to code_interpreter, web_search, file_search, or function
 
 **Answer:** B — The module frames this module's approach (tools specified in prompts by a client application) as "a stepping stone toward agentic AI solutions," where the model, instructions, and tools are encapsulated and persisted as a named agent (covered in the separate agents learning path).
 
@@ -78,10 +78,10 @@ D. Cannot use the pandas library
 
 **Q6.** A developer instructs the model to "use the python tool to run code for math problems." Why does the module recommend using the phrase "python tool" specifically?
 
-A. It's required syntax for the `tools` array
+A. It's required syntax for the `tools` array — the `tools` array itself only ever needs `"type": "code_interpreter"`, not this phrase
 B. Many models internally use the name "python tool" to identify the code_interpreter tool, so using this language in instructions improves alignment
-C. "python tool" is a separate, distinct tool from code_interpreter
-D. It disables the sandboxing restrictions
+C. "python tool" is a separate, distinct tool from code_interpreter — the module never lists it as its own tool type
+D. It disables the sandboxing restrictions — nothing in the module suggests instruction wording can change sandbox behavior
 
 **Answer:** B — Best practices state: "Many models internally use the name python tool to identify the code_interpreter tool - so use this language in your instructions."
 
@@ -105,10 +105,10 @@ D. The Foundry portal automatically deploys the code as an Azure Function
 
 **Q26.** Which of the following is an explicit code_interpreter best practice regarding AI-generated code before it's used in production?
 
-A. Skip validation since the sandbox guarantees correctness
+A. Skip validation since the sandbox guarantees correctness — the module explicitly recommends validating generated code, sandboxing alone isn't treated as sufficient
 B. Validate AI-generated code before production use, and monitor costs since code execution adds tokens
-C. Always disable the container setting
-D. Only use code_interpreter for read-only operations
+C. Always disable the container setting — the container config is what provisions the sandbox in the first place, not something to disable
+D. Only use code_interpreter for read-only operations — no such restriction is listed among the module's best practices
 
 **Answer:** B — The module's best practices explicitly include "validate AI-generated code before production use" and "monitor costs (code execution adds tokens)."
 
@@ -116,10 +116,10 @@ D. Only use code_interpreter for read-only operations
 
 **Q7.** Which key feature of the web_search tool directly helps REDUCE hallucination risk?
 
-A. Automatic query generation
+A. Automatic query generation — this affects convenience, not whether answers are grounded in real sources
 B. Source-grounded responses, since answers are built from retrieved web content rather than solely from training data
-C. Seamless user experience
-D. Live information retrieval speed
+C. Seamless user experience — a UX benefit, not a hallucination-reduction mechanism
+D. Live information retrieval speed — speed doesn't by itself make an answer more factually grounded
 
 **Answer:** B — "Reduced hallucination risk - Improve reliability by checking external sources" is listed directly, tied to building answers from retrieved content ("Source-grounded responses").
 
@@ -134,10 +134,10 @@ D. Calling an internal API to check order status
 
 **Q9.** Which limitation of web_search means that running the SAME query twice might yield DIFFERENT results?
 
-A. Regional network restrictions
+A. Regional network restrictions — this affects whether a query can run at all, not why identical queries diverge
 B. Retrieved content may change over time, so repeated runs can produce different answers
-C. The sandboxed environment resets between calls
-D. Source quality can vary
+C. The sandboxed environment resets between calls — that's a code_interpreter concept, web_search has no sandbox
+D. Source quality can vary — a separate concern from why the SAME query yields different results over time
 
 **Answer:** B — Explicitly listed as a limitation: "Retrieved content may change over time, so repeated runs can produce different answers."
 
@@ -181,10 +181,10 @@ D. `client.embeddings.create()` then `client.responses.create()`
 
 **Q11.** What does adding `include=["file_search_call.results"]` to a `responses.create()` call accomplish?
 
-A. It forces the model to always use file_search regardless of the prompt
+A. It forces the model to always use file_search regardless of the prompt — `include` only affects what's returned, not tool selection
 B. It surfaces the file_search retrieval results (matched passages) in the response for debugging/traceability
-C. It uploads new files to the vector store automatically
-D. It restricts the search to only PDF file types
+C. It uploads new files to the vector store automatically — that's handled by `upload_and_poll`, a separate call entirely
+D. It restricts the search to only PDF file types — nothing about `include` filters by file type
 
 **Answer:** B — This parameter is used specifically to make retrieval results visible for citations/transparency and troubleshooting, consistent with the "Citations and transparency" key feature and the best practice "Include retrieval results in development... for troubleshooting."
 
@@ -199,10 +199,10 @@ D. Switching to the ChatCompletions API
 
 **Q13.** Which characteristic distinguishes file_search's retrieval method from simple exact keyword matching?
 
-A. It only searches file names, not content
+A. It only searches file names, not content — the opposite is true; file_search indexes and searches document content
 B. Semantic retrieval — it finds relevant passages by meaning, not only exact keyword matches
-C. It requires exact case-sensitive string matches
-D. It only works with structured JSON files
+C. It requires exact case-sensitive string matches — that describes basic keyword matching, which is what file_search moves beyond
+D. It only works with structured JSON files — the module's example uses an unstructured PDF, not JSON
 
 **Answer:** B — "Semantic retrieval - Finds relevant passages by meaning, not only exact keyword matches" is explicitly listed as a key feature.
 
@@ -255,10 +255,10 @@ D. `{"type": "tool_response", "id": ...}`
 
 **Q16.** How does the application code determine that the model wants to call a specific function, per the example in the module?
 
-A. By checking `response.status == "function_requested"`
+A. By checking `response.status == "function_requested"` — no such status value or field appears anywhere in the example
 B. By iterating `response.output` and checking `item.type == "function_call"` and `item.name`
-C. By parsing `response.output_text` for a JSON string
-D. By checking `response.usage.function_calls`
+C. By parsing `response.output_text` for a JSON string — the example checks structured `item.type`, not a text field
+D. By checking `response.usage.function_calls` — `usage` tracks token counts, not function-call detection
 
 **Answer:** B — The example code loops: `for item in response.output: if item.type == "function_call" and item.name == "get_time":`.
 
@@ -273,19 +273,19 @@ D. Avoid logging tool usage to reduce overhead
 
 **Q18.** A prompt like "Hello" does NOT trigger the `get_time` function in the module's example, but "What time is it?" does. What does this demonstrate about function tool behavior?
 
-A. Functions must be manually invoked by the developer for every prompt
+A. Functions must be manually invoked by the developer for every prompt — that would make the differing example behavior impossible, since no manual invocation happens
 B. The model evaluates each prompt and decides autonomously whether a function call is needed based on user intent
-C. The function tool only works with prompts containing the word "time"
-D. All prompts always trigger every available function
+C. The function tool only works with prompts containing the word "time" — a narrower rule than what the module actually describes about intent-based evaluation
+D. All prompts always trigger every available function — contradicted directly by "Hello" not triggering `get_time`
 
 **Answer:** B — This matches the "How it works" step: "Model evaluates the prompt - It determines whether a function call is needed," demonstrated by the differing behavior between the two example prompts.
 
 **Q33.** In the module's function tool example, the initial system-level prompt is set using `{"role": "developer", "content": "You are an AI assistant..."}`. What does the module note about this role name?
 
-A. `"developer"` is invalid and would cause an API error
+A. `"developer"` is invalid and would cause an API error — the example uses it successfully, so it's clearly a valid role value
 B. `"developer"` is used here for the system-level prompt, distinct from the `"system"` role seen elsewhere in the module — both patterns appear in Microsoft's examples
-C. `"developer"` grants the message elevated administrative permissions over the model
-D. `"developer"` can only be used with the code_interpreter tool
+C. `"developer"` grants the message elevated administrative permissions over the model — the module never describes any permission or privilege tied to a role name
+D. `"developer"` can only be used with the code_interpreter tool — the role name is unrelated to which tool is configured in the `tools` array
 
 **Answer:** B — The module explicitly notes this role-naming nuance: `"developer"` is used for the system-level prompt in the function-calling example, distinct from `"system"` used elsewhere, and states both patterns appear in Microsoft's examples — a subtle exam-relevant detail.
 
@@ -301,9 +301,9 @@ D. Math & Physics — solving differential equations
 **Q35.** Which limitation applies specifically to the function tool, distinguishing it from tools whose retrieval/execution happens entirely within the platform?
 
 A. Tool latency increases end-to-end response time, because your application must run the function before the model can continue
-B. No external network access is available
-C. Results may change between runs due to live content changes
-D. Answer quality depends on document chunking
+B. No external network access is available — this describes the sandboxed code_interpreter environment, not the function tool
+C. Results may change between runs due to live content changes — this is a web_search limitation about content changing over time, not something specific to function
+D. Answer quality depends on document chunking — this describes file_search's vector-store retrieval quality, not function's execution model
 
 **Answer:** A — The module lists "tool latency increases end-to-end response time" as a function-tool limitation, since your app must execute the function and return output before the model can finish. B is a code_interpreter limitation, C is a web_search limitation, and D is a file_search limitation.
 
@@ -311,28 +311,28 @@ D. Answer quality depends on document chunking
 
 **Q19.** A developer needs the model to answer questions using only the company's internal, uploaded compliance manual, with citations to specific matched passages. Which tool is most appropriate, and why NOT web_search?
 
-A. web_search — because it can find any content, including internal manuals published online
+A. web_search — because it can find any content, including internal manuals published online — but web_search explicitly accesses only public internet content, not private uploaded documents
 B. file_search — because it grounds responses in your own uploaded/indexed documents with semantic retrieval and citation support, whereas web_search only accesses public internet content
-C. function — because functions can retrieve any data source
-D. code_interpreter — because it can read uploaded files directly
+C. function — because functions can retrieve any data source — functions only execute developer-written logic, they don't do semantic document retrieval on their own
+D. code_interpreter — because it can read uploaded files directly — it processes files for computation, not for citation-backed semantic search
 
 **Answer:** B — file_search is specifically designed for document-grounded answers from uploaded files with citations, while web_search explicitly retrieves information from the public Internet, not private/internal documents. code_interpreter (D) can process uploaded files for computation but isn't designed for semantic search/grounding over document content.
 
 **Q20.** Which tool requires your OWN application code to execute logic and is the only one of the four where the model cannot autonomously produce the final data itself (code, search results, or documents) without your app performing an intermediate step?
 
-A. code_interpreter, since it runs in a sandbox
-B. web_search, since it depends on external content
+A. code_interpreter, since it runs in a sandbox — but that sandbox executes fully within the platform, the model still gets its result without any app-side step
+B. web_search, since it depends on external content — retrieval still happens within the platform, not via your own application code
 C. function, since the model only emits a structured call that your application must run before returning output
-D. file_search, since it depends on a vector store
+D. file_search, since it depends on a vector store — the vector search itself runs within the platform, requiring no app-side execution step
 
 **Answer:** C — Unlike code_interpreter (executes code within the platform's sandbox) or web_search/file_search (retrieval happens within the platform), the function tool explicitly requires "Your app runs logic" as a mandatory step — the model cannot get the function's result without your application executing it and returning `function_call_output`.
 
 **Q36.** Matching each tool to WHERE its grounding activity actually executes: which pairing is correct?
 
-A. code_interpreter → your own application; function → sandboxed cloud Python runtime
+A. code_interpreter → your own application; function → sandboxed cloud Python runtime — this swaps the two pairings the module actually describes, putting each tool in the wrong execution environment
 B. code_interpreter → sandboxed cloud Python runtime (no network access); web_search → external web via search API; file_search → indexed vector search index; function → your own application (developer-controlled)
-C. All four tools execute exclusively inside the Foundry-managed sandbox
-D. web_search → your own application; file_search → external web
+C. All four tools execute exclusively inside the Foundry-managed sandbox — function specifically executes in your own application, not any managed sandbox, which the module states explicitly
+D. web_search → your own application; file_search → external web — this also swaps two of the module's actual pairings, reversing where each tool's retrieval genuinely happens
 
 **Answer:** B — This is the module's cross-tool comparison table exactly: code_interpreter executes in a sandboxed cloud Python runtime with no network access, web_search hits the external web via a search API, file_search queries an indexed vector search index, and function executes in your own developer-controlled application.
 
@@ -340,63 +340,63 @@ D. web_search → your own application; file_search → external web
 
 **Q37.** A developer builds a client app where the model must (1) read an uploaded CSV of sales figures and compute month-over-month growth, then (2) call an internal API to log the computed growth rate into a business system. Which combination of tools and execution responsibilities is correct?
 
-A. Use `web_search` for both steps, since it can access any external system
+A. Use `web_search` for both steps, since it can access any external system — web_search only retrieves public internet content, it can't compute over an uploaded CSV or reach a private internal API at all
 B. Use `code_interpreter` for the CSV computation (executed in the sandboxed Python runtime) and `function` for logging to the internal API (executed by the developer's own application code after receiving a structured function-call request)
-C. Use `file_search` for both steps, since CSVs are files
-D. Use `function` for both steps, since functions can do arbitrary computation and I/O
+C. Use `file_search` for both steps, since CSVs are files — file_search performs semantic document retrieval over indexed text, not numeric computation or API calls to internal systems
+D. Use `function` for both steps, since functions can do arbitrary computation and I/O — the module treats code_interpreter as the designated tool for sandboxed data computation, reserving function for developer-executed actions like logging
 
 **Answer:** B — code_interpreter is designed for dynamic data analysis/computation on uploaded files within its sandbox, while writes to internal/business systems must go through the function tool, where the model only requests the call and the developer's application actually executes it.
 
 **Q38.** A support chatbot needs to (1) answer questions from the company's internal, uploaded troubleshooting guides, and (2) also check whether a related software bug was reported in recent public news, reducing the risk of stating outdated information. Which two tools should be combined, and what is the key grounding difference between them?
 
-A. code_interpreter and function — both execute developer-controlled logic
+A. code_interpreter and function — both execute developer-controlled logic, but neither performs semantic document retrieval or live web grounding at all
 B. file_search (grounds in your own uploaded/indexed documents via semantic retrieval) and web_search (grounds in live public internet content, reducing hallucination on time-sensitive facts)
-C. web_search for both, since it can find internal documents if they're indexed by any search engine
-D. file_search for both, since troubleshooting and news are both "documents"
+C. web_search for both, since it can find internal documents if they're indexed by any search engine — web_search explicitly accesses public internet content, not private uploaded documents
+D. file_search for both, since troubleshooting and news are both "documents" — file_search only searches what's been uploaded/indexed, it has no access to live public news
 
 **Answer:** B — file_search grounds answers in the company's own uploaded/indexed documents (with citations), while web_search grounds answers in current external internet content — the two tools ground responses in fundamentally different sources, which is why both are needed here.
 
 **Q39.** A team's design doc says: "Our agent uses Foundry Tools including code_interpreter and web_search." A reviewer flags this sentence as technically imprecise. What is the correct terminology distinction, per the module?
 
-A. There is no imprecision; Foundry Tools and Responses API tools are the same thing
+A. There is no imprecision; Foundry Tools and Responses API tools are the same thing — this is exactly the conflation the module explicitly warns against, since the two names describe entirely separate concepts despite the shared word "tools"
 B. code_interpreter and web_search are Responses API prompt-level tools, distinct from "Foundry Tools" (like Azure Language, Speech, Translator, Document Intelligence, Content Understanding) — the sentence conflates the two despite similar naming
-C. Foundry Tools refers only to code_interpreter, not web_search
-D. code_interpreter is a Foundry Tool but web_search is not
+C. Foundry Tools refers only to code_interpreter, not web_search — neither one is actually a Foundry Tool at all, so drawing any line between them on this basis is beside the point entirely
+D. code_interpreter is a Foundry Tool but web_search is not — both are prompt-level Responses API tools, not Foundry Tools, so neither one qualifies as a Foundry Tool under the module's terminology
 
 **Answer:** B — The module explicitly warns against this exact conflation: prompt-level tools (code_interpreter, web_search, file_search, function) are a different concept from Foundry Tools (the suite of Azure AI APIs), despite the shared word "tools."
 
 **Q40.** An enterprise wants an agent that can ground responses in a small, well-defined internal FAQ document set today, but is already planning to scale to dozens of large, cross-departmental data stores within a year. What does the module suggest about tool/architecture choice across this growth path?
 
-A. file_search alone will always scale to any number of data stores with no architectural change needed
+A. file_search alone will always scale to any number of data stores with no architectural change needed — the module explicitly recommends Foundry IQ once scale grows toward enterprise level
 B. Start with file_search for the current small/well-defined document set; as the number/scale of data stores grows toward enterprise scale, consider Foundry IQ with a Microsoft Foundry agent instead
-C. Use code_interpreter for all document grounding regardless of scale
-D. Use web_search once the internal documents are published publicly, to avoid the re-indexing limitation
+C. Use code_interpreter for all document grounding regardless of scale — code_interpreter is for sandboxed computation, not semantic document grounding at any scale
+D. Use web_search once the internal documents are published publicly, to avoid the re-indexing limitation — publishing internal documents publicly isn't a solution the module suggests anywhere
 
 **Answer:** B — This matches the module's explicit distinction: file_search suits grounding in a specific set of documents, but for enterprise-scale needs across multiple data stores, Foundry IQ with a Foundry agent is the recommended path.
 
 **Q41.** A developer exposes a `cancel_subscription` function to the model via the function tool. To follow the module's best practices for safe production use, which combination of safeguards should they implement?
 
-A. Trust all model-provided arguments as-is, and let the function execute immediately with no logging
+A. Trust all model-provided arguments as-is, and let the function execute immediately with no logging — this directly contradicts two explicit function-tool best practices
 B. Validate the function's input arguments before executing, require explicit authorization for this high-impact/sensitive operation, and log the call (latency/failure rate) for auditing
-C. Skip validation since code_interpreter's sandbox already protects the app
-D. Disable the `function` tool entirely, since no safeguards are possible
+C. Skip validation since code_interpreter's sandbox already protects the app — code_interpreter's sandbox is unrelated to the function tool, which has no such sandbox at all
+D. Disable the `function` tool entirely, since no safeguards are possible — the module lists concrete safeguards (validation, authorization, logging) rather than recommending disabling the tool
 
 **Answer:** B — This combines three explicit function-tool best practices: validate function inputs (never trust tool arguments blindly), limit sensitive operations (require explicit authorization for high-impact actions), and log tool usage (track calls, latency, failure rates) — all directly relevant to a destructive action like canceling a subscription.
 
 **Q42.** By default the model decides which tool (if any) to use for a given prompt. A developer wants the model to strongly prefer file_search over web_search whenever a user asks about "company policy," without removing the model's general autonomy to pick tools for other prompts. How should they achieve this per the module?
 
-A. Remove web_search from the `tools` array entirely, permanently
+A. Remove web_search from the `tools` array entirely, permanently — that would remove the model's general autonomy to pick tools for other, unrelated prompts, which the developer explicitly wants to preserve
 B. Use the `instructions` (system prompt) parameter to guide tool selection behavior, e.g. directing the model to prefer file_search for company-policy questions, while both tools remain available for other prompts
-C. This is not possible; tool selection can never be influenced by developers
-D. Call `client.vector_stores.create()` with a `force_tool` parameter
+C. This is not possible; tool selection can never be influenced by developers — the module explicitly states tool selection can be guided via the Instructions parameter and configurable selection rules
+D. Call `client.vector_stores.create()` with a `force_tool` parameter — no such parameter exists on that call, which only creates a vector store and has nothing to do with guiding tool choice
 
 **Answer:** B — The module states you can "configure tool selection rules and use the Instructions (system prompt) parameter to guide this choice" — the recommended way to bias behavior without hard-removing a tool's availability.
 
 **Q43.** An assistant needs to, within one conversation flow: look up a live stock price (not in training data), compute a moving average from an uploaded price-history CSV, answer a question from an uploaded internal risk-policy PDF, and log the analysis result via an internal API. Which `tools` array configuration correctly supports all four needs?
 
-A. `tools=[{"type": "function"}]` only, since functions can do everything
+A. `tools=[{"type": "function"}]` only, since functions can do everything — function only executes developer-written logic, it can't fetch live prices, run sandboxed computation, or search a vector store on its own
 B. `tools=[{"type": "web_search"}, {"type": "code_interpreter", "container": {"type": "auto"}}, {"type": "file_search", "vector_store_ids": [...]}, {"type": "function", "name": "log_analysis", "description": "..."}]`
-C. `tools=[{"type": "code_interpreter"}]` only, since it has network access for live data
-D. `tools=[{"type": "file_search"}]` only, since vector stores can hold live stock data
+C. `tools=[{"type": "code_interpreter"}]` only, since it has network access for live data — code_interpreter's sandbox explicitly has no external network access
+D. `tools=[{"type": "file_search"}]` only, since vector stores can hold live stock data — vector stores hold indexed documents you've uploaded, not live market data feeds
 
 **Answer:** B — Each requirement maps to a distinct tool: web_search for live/current external data, code_interpreter for sandboxed computation on the uploaded CSV, file_search for grounding in the uploaded internal PDF via a vector store, and function for the developer-controlled action of logging to an internal API — all four can be specified together in the same `tools` array.

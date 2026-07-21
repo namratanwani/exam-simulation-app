@@ -38,11 +38,31 @@ body {
 header {
   border-bottom: 1px solid var(--border);
   padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .brand {
   font-weight: 600;
   text-decoration: none;
+  color: var(--fg);
+}
+
+nav {
+  display: flex;
+  gap: 1.25rem;
+}
+
+nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+nav a:hover {
   color: var(--fg);
 }
 
@@ -156,6 +176,74 @@ button, .button {
 .review-item {
   border-top: 1px solid var(--border);
   padding: 1rem 0;
+}
+
+.wrong-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.wrong-header .muted { margin: 0; }
+.wrong-header button { margin: 0; }
+
+details.attempt {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem;
+  width: 100%;
+}
+
+details.attempt summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  list-style: none;
+}
+
+details.attempt summary::-webkit-details-marker,
+details.attempt summary::marker {
+  display: none;
+  content: "";
+}
+
+details.attempt[open] summary {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.attempt-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.attempt-date {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.attempt-label {
+  font-weight: 600;
+}
+
+.attempt-score {
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+details.attempt .review-item:first-of-type {
+  border-top: none;
+  padding-top: 0;
 }
 
 .options-list {
