@@ -2,29 +2,36 @@
 {% block content %}
   <h1>Wrong Answers</h1>
 
-  {% if not attempts %}
-    <p class="muted">No quizzes taken yet — they'll show up here after you finish one.</p>
+  {% if not entries %}
+    <p class="muted">No quizzes yet — they'll show up here as soon as you start answering.</p>
   {% else %}
     <div class="wrong-header">
-      <p class="muted">{{ attempts | length }} quiz{{ 'zes' if attempts | length != 1 else '' }} taken.</p>
+      <p class="muted">{{ entries | length }} quiz{{ 'zes' if entries | length != 1 else '' }}.</p>
       <form method="post" action="{{ url_for('wrong_answers_clear') }}"
-            onsubmit="return confirm('Clear all quiz history?');">
+            onsubmit="return confirm('Clear all completed quiz history? (In-progress quizzes are kept.)');">
         <button type="submit">Clear history</button>
       </form>
     </div>
 
-    {% for a in attempts %}
+    {% for a in entries %}
       <details class="attempt">
         <summary>
           <span class="attempt-info">
-            <span class="attempt-date">{{ a.taken_at[:10] }}</span>
+            <span class="attempt-date">{{ a.date }}</span>
             <span class="attempt-label">{{ a.label }}</span>
+            {% if a.extra %}<span class="attempt-extra">{{ a.extra }}</span>{% endif %}
           </span>
-          <span class="attempt-score">{{ a.score | round(1) }}/{{ a.total }} ({{ a.pct }}%)</span>
+          <span class="attempt-score">{{ a.score_label }}</span>
         </summary>
 
+        {% if a.resume_id %}
+          <p><a class="button" href="{{ url_for('resume_test', progress_id=a.resume_id) }}">Resume this quiz</a></p>
+        {% endif %}
+
         {% if not a.questions %}
-          <p class="result correct">Perfect score — nothing missed.</p>
+          <p class="result correct">
+            {{ 'Nothing wrong so far.' if a.resume_id else 'Perfect score — nothing missed.' }}
+          </p>
         {% else %}
           {% for m in a.questions %}
             <div class="review-item">

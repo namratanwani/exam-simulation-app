@@ -45,15 +45,21 @@ def render_md(text: str) -> str:
     return escaped
 
 
-def get_question(idx: int) -> dict:
-    """BANK[idx] with its options relettered using a seed stored in the
-    session, so the same question shows the same shuffled letters across the
-    GET (show) -> POST (grade) -> results (review) lifecycle of one quiz,
-    but a fresh random arrangement each time a new quiz is started."""
+def get_question_with_seed(idx: int, seed: int) -> dict:
+    """BANK[idx] with its options relettered using an explicit seed — used
+    when reconstructing a quiz that isn't the current session's (e.g. a
+    different in-progress quiz shown on the Wrong Answers page)."""
     q = BANK[idx]
-    seed = session.get("shuffle_seed", 0)
     mapping = random_letter_map(q, random.Random((seed, idx)))
     return remap_options(q, mapping)
+
+
+def get_question(idx: int) -> dict:
+    """BANK[idx] relettered using the current session's shuffle seed, so the
+    same question shows the same shuffled letters across the GET (show) ->
+    POST (grade) -> results (review) lifecycle of one quiz, but a fresh
+    random arrangement each time a new quiz is started."""
+    return get_question_with_seed(idx, session.get("shuffle_seed", 0))
 
 
 def enrich(q: dict) -> dict:
@@ -82,7 +88,11 @@ def index():
     session.pop("answers", None)
     session.pop("label", None)
     session.pop("recorded", None)
-    return render_template("index.html", structure=STRUCTURE, total=len(BANK))
+    session.pop("progress_id", None)
+    return render_template(
+        "index.html", structure=STRUCTURE, total=len(BANK),
+        unfinished_count=len(history.list_progress()),
+    )
 
 
 @app.route("/start", methods=["POST"])
@@ -122,7 +132,40 @@ def start():
     session["label"] = label
     session["shuffle_seed"] = random.randint(0, 2**31 - 1)
     session.pop("recorded", None)
+    session["progress_id"] = history.save_progress(
+        None, label, session["question_ids"], session["answers"], session["shuffle_seed"],
+    )
     return redirect(url_for("quiz"))
+
+
+@app.route("/resume")
+def resume_list():
+    return render_template("resume.html", tests=history.list_progress())
+
+
+@app.route("/resume/<int:progress_id>")
+def resume_test(progress_id):
+    progress = history.get_progress(progress_id)
+    if not progress:
+        return redirect(url_for("resume_list"))
+    session["question_ids"] = progress["question_ids"]
+    session["answers"] = progress["answers"]
+    session["label"] = progress["label"]
+    session["shuffle_seed"] = progress["shuffle_seed"]
+    session["progress_id"] = progress["id"]
+    session.pop("recorded", None)
+    return redirect(url_for("quiz"))
+
+
+@app.route("/resume/<int:progress_id>/discard", methods=["POST"])
+def resume_discard(progress_id):
+    history.delete_progress(progress_id)
+    if session.get("progress_id") == progress_id:
+        session.pop("question_ids", None)
+        session.pop("answers", None)
+        session.pop("label", None)
+        session.pop("progress_id", None)
+    return redirect(url_for("resume_list"))
 
 
 @app.route("/quiz", methods=["GET", "POST"])
@@ -145,6 +188,9 @@ def quiz():
         fraction, status = score_answer(q, given)
         answers = answers + [{"given": given, "fraction": fraction, "status": status}]
         session["answers"] = answers
+        session["progress_id"] = history.save_progress(
+            session.get("progress_id"), session["label"], session["question_ids"], answers, session["shuffle_seed"],
+        )
         return render_template(
             "feedback.html",
             q=enrich(q),
@@ -190,6 +236,9 @@ def results():
 
     if not session.get("recorded"):
         history.record_attempt(session.get("label", ""), score, total, pct, missed)
+        if session.get("progress_id") is not None:
+            history.delete_progress(session["progress_id"])
+            session.pop("progress_id", None)
         session["recorded"] = True
 
     return render_template(
@@ -199,9 +248,49 @@ def results():
     )
 
 
+def _attempt_entry(a):
+    return {
+        "sort_key": a["taken_at"], "date": a["taken_at"][:10], "label": a["label"],
+        "score_label": f"{a['score']:.1f}/{a['total']} ({a['pct']}%)",
+        "extra": None, "resume_id": None, "questions": a["questions"],
+    }
+
+
+def _progress_entry(p):
+    """A not-yet-finished quiz shown the same way as a completed attempt,
+    with wrong answers computed from however much has been answered so far
+    — so you don't have to finish a 100-question quiz to see how you're
+    doing on the questions you've already answered."""
+    answered = p["answers"]
+    done = len(answered)
+    score = sum(x["fraction"] for x in answered)
+    pct = round(100 * score / done) if done else 0
+    wrong = []
+    for idx, ans in zip(p["question_ids"], answered):
+        if ans["status"] == "correct":
+            continue
+        q = enrich(get_question_with_seed(idx, p["shuffle_seed"]))
+        wrong.append({
+            "path": q["path"], "module": q["module"], "section": q["section"],
+            "stem_html": q["stem_html"], "options_html": q["options_html"],
+            "sequence": q["sequence"], "explanation_html": q["explanation_html"],
+            "correct_answer": q["answer"], "given_answer": ans["given"],
+            "status": ans["status"], "fraction": ans["fraction"],
+        })
+    return {
+        "sort_key": p["updated_at"], "date": p["updated_at"][:10], "label": p["label"],
+        "score_label": f"{score:.1f}/{done} ({pct}%)" if done else "Not started yet",
+        "extra": f"In progress — {done}/{len(p['question_ids'])} answered",
+        "resume_id": p["id"], "questions": wrong,
+    }
+
+
 @app.route("/wrong-answers")
 def wrong_answers():
-    return render_template("wrong_answers.html", attempts=history.list_attempts())
+    entries = [_progress_entry(p) for p in history.list_progress()]
+    entries += [_attempt_entry(a) for a in history.list_attempts()]
+    entries.sort(key=lambda e: e["sort_key"], reverse=True)
+    return render_template("wrong_answers.html", entries=entries)
 
 
 @app.route("/wrong-answers/clear", methods=["POST"])

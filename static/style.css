@@ -137,6 +137,35 @@ button, .button {
   margin-top: 1rem;
 }
 
+.resume-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.resume-label { font-weight: 600; margin: 0 0 0.25rem; }
+.resume-banner .muted { margin: 0; }
+
+.resume-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.resume-actions form { margin: 0; }
+
+button.secondary {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border);
+}
+
 .result { font-weight: 600; margin: 1rem 0 0.25rem; }
 .result.correct { color: var(--correct); }
 .result.partial { color: var(--partial); }
@@ -233,6 +262,11 @@ details.attempt[open] summary {
 
 .attempt-label {
   font-weight: 600;
+}
+
+.attempt-extra {
+  color: var(--partial);
+  font-size: 0.8rem;
 }
 
 .attempt-score {

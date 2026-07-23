@@ -4,11 +4,14 @@ Answers" page, grouped one expander per attempt.
 """
 
 import json
+import os
 import sqlite3
 from datetime import datetime
 from pathlib import Path
 
-DB_PATH = Path(__file__).resolve().parent.parent / "wrong_answers.db"
+# Overridable via QUIZ_DB_PATH (e.g. for testing against a throwaway file
+# instead of the user's real quiz history).
+DB_PATH = Path(os.environ.get("QUIZ_DB_PATH", Path(__file__).resolve().parent.parent / "wrong_answers.db"))
 
 
 def _connect():
@@ -54,6 +57,94 @@ def init_db():
         )
         """
     )
+    old_schema = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type='table' AND name='in_progress'"
+    ).fetchone()
+    if old_schema and "CHECK" in old_schema["sql"]:
+        # Older schema only ever tracked a single singleton row (id fixed to
+        # 1 via a CHECK constraint) — replaced by a normal auto-incrementing
+        # table so multiple unfinished quizzes can be tracked independently.
+        conn.execute("DROP TABLE IF EXISTS in_progress")
+
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS in_progress (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            label TEXT NOT NULL,
+            question_ids TEXT NOT NULL,
+            answers TEXT NOT NULL,
+            shuffle_seed INTEGER NOT NULL,
+            started_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )
+        """
+    )
+    conn.commit()
+    conn.close()
+
+
+def save_progress(progress_id, label, question_ids, answers, shuffle_seed):
+    """Insert (progress_id is None) or update (progress_id is an existing
+    row's id) one in-progress quiz. Returns the row's id either way, so
+    callers can stash it in the session for subsequent saves.
+
+    Each quiz you start-but-don't-finish gets its own row, so several can be
+    resumed independently later — this survives closing the browser or
+    restarting the server overnight, since it isn't tied to the session
+    cookie."""
+    conn = _connect()
+    now = datetime.now().isoformat()
+    if progress_id is not None:
+        cur = conn.execute(
+            """UPDATE in_progress SET label=?, question_ids=?, answers=?, shuffle_seed=?, updated_at=?
+               WHERE id=?""",
+            (label, json.dumps(question_ids), json.dumps(answers), shuffle_seed, now, progress_id),
+        )
+        if cur.rowcount == 0:
+            progress_id = None  # row was deleted/never existed — fall through to insert
+    if progress_id is None:
+        cur = conn.execute(
+            """INSERT INTO in_progress (label, question_ids, answers, shuffle_seed, started_at, updated_at)
+               VALUES (?,?,?,?,?,?)""",
+            (label, json.dumps(question_ids), json.dumps(answers), shuffle_seed, now, now),
+        )
+        progress_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return progress_id
+
+
+def get_progress(progress_id):
+    """One in-progress quiz by id, with question_ids/answers decoded — or
+    None if it doesn't exist (already finished/discarded)."""
+    conn = _connect()
+    row = conn.execute("SELECT * FROM in_progress WHERE id = ?", (progress_id,)).fetchone()
+    conn.close()
+    if not row:
+        return None
+    item = dict(row)
+    item["question_ids"] = json.loads(item["question_ids"])
+    item["answers"] = json.loads(item["answers"])
+    return item
+
+
+def list_progress():
+    """All in-progress quizzes, most recently updated first."""
+    conn = _connect()
+    rows = conn.execute("SELECT * FROM in_progress ORDER BY updated_at DESC").fetchall()
+    conn.close()
+    result = []
+    for row in rows:
+        item = dict(row)
+        item["question_ids"] = json.loads(item["question_ids"])
+        item["answers"] = json.loads(item["answers"])
+        result.append(item)
+    return result
+
+
+def delete_progress(progress_id):
+    conn = _connect()
+    conn.execute("DELETE FROM in_progress WHERE id = ?", (progress_id,))
     conn.commit()
     conn.close()
 

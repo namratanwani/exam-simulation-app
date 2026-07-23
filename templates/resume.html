@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Resume Test</h1>
+
+  {% if not tests %}
+    <p class="muted">No unfinished quizzes — anything you start and don't finish shows up here.</p>
+  {% else %}
+    <p class="muted">{{ tests | length }} unfinished quiz{{ 'zes' if tests | length != 1 else '' }}.</p>
+
+    {% for t in tests %}
+      <div class="resume-banner">
+        <div class="resume-info">
+          <p class="resume-label">{{ t.label }}</p>
+          <p class="muted">
+            {{ t.answers | length }}/{{ t.question_ids | length }} answered
+            &middot; started {{ t.started_at[:10] }}
+          </p>
+        </div>
+        <div class="resume-actions">
+          <a class="button" href="{{ url_for('resume_test', progress_id=t.id) }}">Resume</a>
+          <form method="post" action="{{ url_for('resume_discard', progress_id=t.id) }}"
+                onsubmit="return confirm('Discard this in-progress quiz?');">
+            <button type="submit" class="secondary">Discard</button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endblock %}

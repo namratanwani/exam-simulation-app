@@ -5,6 +5,13 @@
 
   {% if error %}<p class="error">{{ error }}</p>{% endif %}
 
+  {% if unfinished_count %}
+    <p class="muted">
+      You have {{ unfinished_count }} unfinished quiz{{ 'zes' if unfinished_count != 1 else '' }} —
+      <a href="{{ url_for('resume_list') }}">Resume Test</a> to continue.
+    </p>
+  {% endif %}
+
   <form method="post" action="{{ url_for('start') }}" id="quiz-form">
     <fieldset>
       <legend>Quiz type</legend>
